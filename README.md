@@ -1,11 +1,11 @@
 # PaperHelper
 
-A comprehensive tool for scraping paper information from top (A*) conferences in Software Engineering, AI/ML, and Natural Language Processing.
+A comprehensive tool for scraping paper information from top conferences in Software Engineering, AI/ML, and Natural Language Processing.
 
 ## Features
 
 - **Multi-domain Coverage**: Scrapes from top conferences in:
-  - Software Engineering (ICSE, FSE, ASE, ISSTA)
+  - Software Engineering (ICSE, FSE, ASE, ISSTA, ICSA, SANER, ICSME, MSR, ICPC)
   - AI/Machine Learning (ICML, NIPS, ICLR, AAAI, IJCAI)
   - Natural Language Processing (ACL, EMNLP, NAACL, COLING)
 
