@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - PaperHelper{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-chart-bar text-primary"></i> Conference Statistics
+    </h1>
+    <a href="/" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-primary">{{ stats.total_conferences }}</h2>
+                <h5>Conferences</h5>
+                <i class="fas fa-university fa-2x text-muted"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-success">{{ "{:,}".format(stats.total_papers) }}</h2>
+                <h5>Total Papers</h5>
+                <i class="fas fa-file-alt fa-2x text-muted"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-info">{{ stats.conferences_by_year|length }}</h2>
+                <h5>Years Covered</h5>
+                <i class="fas fa-calendar fa-2x text-muted"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-warning">{{ stats.top_authors|length }}</h2>
+                <h5>Unique Authors</h5>
+                <i class="fas fa-users fa-2x text-muted"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Papers by Year -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Papers by Year</h5>
+            </div>
+            <div class="card-body">
+                {% for year, count in stats.conferences_by_year.items()|sort %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span><strong>{{ year }}</strong></span>
+                    <div class="flex-grow-1 mx-3">
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ (count / stats.conferences_by_year.values()|max * 100)|round(1) }}%">
+                                {{ count }}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge bg-primary">{{ count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Papers by Track Type -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tags"></i> Papers by Track Type</h5>
+            </div>
+            <div class="card-body">
+                {% for track, count in stats.papers_by_track.items()|sort(attribute='1', reverse=true) %}
+                {% if track != 'unknown' %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span><strong>{{ track|title }}</strong></span>
+                    <div class="flex-grow-1 mx-3">
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {{ (count / stats.papers_by_track.values()|max * 100)|round(1) }}%">
+                                {{ count }}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge bg-warning">{{ count }}</span>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Authors -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-crown"></i> Most Prolific Authors (Top 20)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for author, count in stats.top_authors.items()[:20] %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                                <strong>{{ author }}</strong>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ (count / stats.top_authors.values()|list|first * 100)|round(1) }}%">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="badge bg-success ms-2">{{ count }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Conference Breakdown -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-table"></i> Conference Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Conference</th>
+                                <th>Papers</th>
+                                <th>Year</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for conference in conferences %}
+                            <tr>
+                                <td><strong>{{ conference.name.replace('_', ' ').title() }}</strong></td>
+                                <td>
+                                    <span class="badge bg-primary">{{ conference.total_papers }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted">
+                                        {{ conference.scraped_at.split('T')[0] if 'T' in conference.scraped_at else conference.scraped_at }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/conference/{{ conference.filename }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Browse
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// You could add Chart.js integration here for more advanced visualizations
+</script>
+{% endblock %}

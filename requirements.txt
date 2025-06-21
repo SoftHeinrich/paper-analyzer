@@ -1,0 +1,16 @@
+# Core dependencies
+requests>=2.28.0
+aiohttp>=3.8.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+
+# Data processing
+pandas>=1.5.0
+openpyxl>=3.0.0
+
+# Optional dependencies for enhanced functionality
+# Uncomment if needed:
+# selenium>=4.5.0  # For JavaScript-heavy sites
+# scrapy>=2.6.0   # Alternative scraping framework
+# nltk>=3.7       # Natural language processing
+# spacy>=3.4.0    # Advanced NLP features

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}{{ paper.title }} - PaperHelper{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">
+                <a href="/conference/{{ filename }}">{{ conference_name }}</a>
+            </li>
+            <li class="breadcrumb-item active">Paper Details</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-alt text-primary"></i> Paper Details
+                </h4>
+            </div>
+            <div class="card-body">
+                <h2 class="paper-title mb-3">{{ paper.title }}</h2>
+                
+                <!-- Metadata badges -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% if paper.year %}
+                    <span class="badge bg-info">
+                        <i class="fas fa-calendar"></i> {{ paper.year }}
+                    </span>
+                    {% endif %}
+                    
+                    {% if paper.track_type %}
+                    <span class="badge bg-warning">
+                        <i class="fas fa-tag"></i> {{ paper.track_type|title }}
+                    </span>
+                    {% endif %}
+                    
+                    {% if paper.venue %}
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-university"></i> {{ paper.venue }}
+                    </span>
+                    {% endif %}
+                    
+                    {% if paper.pages %}
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-file"></i> Pages: {{ paper.pages }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Authors -->
+                {% if paper.authors %}
+                <div class="mb-4">
+                    <h5><i class="fas fa-users"></i> Authors</h5>
+                    <div class="row">
+                        {% for author in paper.authors %}
+                        <div class="col-md-6 col-lg-4 mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user text-muted me-2"></i>
+                                <span>{{ author.name }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Abstract -->
+                {% if paper.abstract %}
+                <div class="mb-4">
+                    <h5><i class="fas fa-align-left"></i> Abstract</h5>
+                    <p class="text-justify">{{ paper.abstract }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Keywords -->
+                {% if paper.keywords %}
+                <div class="mb-4">
+                    <h5><i class="fas fa-tags"></i> Keywords</h5>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for keyword in paper.keywords %}
+                        <span class="badge bg-light text-dark">{{ keyword }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- DOI and URLs -->
+                {% if paper.doi or paper.url or paper.pdf_url %}
+                <div class="mb-4">
+                    <h5><i class="fas fa-external-link-alt"></i> Links</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if paper.doi %}
+                        <a href="https://doi.org/{{ paper.doi }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-link"></i> DOI
+                        </a>
+                        {% endif %}
+                        
+                        {% if paper.url %}
+                        <a href="{{ paper.url if paper.url.startswith('http') else 'https://dblp.org/rec/' + paper.url }}" 
+                           target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-database"></i> DBLP
+                        </a>
+                        {% endif %}
+                        
+                        {% if paper.pdf_url %}
+                        <a href="{{ paper.pdf_url }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Citation Search -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-search"></i> Find Citations
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Search for this paper on academic databases:</p>
+                <div class="search-urls d-flex flex-column gap-2">
+                    <a href="{{ search_urls.google_scholar }}" target="_blank" class="btn btn-outline-success btn-sm">
+                        <i class="fab fa-google"></i> Google Scholar
+                    </a>
+                    <a href="{{ search_urls.semantic_scholar }}" target="_blank" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-brain"></i> Semantic Scholar
+                    </a>
+                    <a href="{{ search_urls.acm_dl }}" target="_blank" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-book"></i> ACM Digital Library
+                    </a>
+                    <a href="{{ search_urls.ieee_xplore }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-bolt"></i> IEEE Xplore
+                    </a>
+                    {% if search_urls.dblp %}
+                    <a href="{{ search_urls.dblp }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-database"></i> DBLP Search
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Paper Navigation -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-navigation"></i> Paper Navigation
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-2">
+                    {% if paper_index > 0 %}
+                    <a href="/paper/{{ filename }}/{{ paper_index - 1 }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-chevron-left"></i> Previous Paper
+                    </a>
+                    {% endif %}
+                    
+                    <a href="/conference/{{ filename }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list"></i> Back to Paper List
+                    </a>
+                    
+                    <a href="/paper/{{ filename }}/{{ paper_index + 1 }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-chevron-right"></i> Next Paper
+                    </a>
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        Paper {{ paper_index + 1 }} of conference
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

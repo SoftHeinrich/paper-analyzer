@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}PaperHelper - Conference Papers{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4">
+                <i class="fas fa-search text-primary"></i> PaperHelper
+            </h1>
+            <p class="lead text-muted">
+                Browse and search conference papers from top SE, AI/ML, and NLP venues
+            </p>
+        </div>
+    </div>
+</div>
+
+{% if conferences %}
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="mb-4">
+            <i class="fas fa-university"></i> Available Conferences
+            <span class="badge bg-primary">{{ conferences|length }}</span>
+        </h2>
+        
+        <div class="row">
+            {% for conference in conferences %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="/conference/{{ conference.filename }}" class="text-decoration-none">
+                                {{ conference.name.replace('_', ' ').title() }}
+                            </a>
+                        </h5>
+                        <p class="card-text">
+                            <span class="badge bg-success">
+                                <i class="fas fa-file-alt"></i> {{ conference.total_papers }} papers
+                            </span>
+                        </p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> 
+                                Scraped: {{ conference.scraped_at.split('T')[0] if 'T' in conference.scraped_at else conference.scraped_at }}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="/conference/{{ conference.filename }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> Browse Papers
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card stats-card text-white">
+            <div class="card-body text-center">
+                <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <h2>{{ conferences|length }}</h2>
+                        <p>Conferences</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h2>{{ conferences|sum(attribute='total_papers') }}</h2>
+                        <p>Total Papers</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h2>{{ conferences|map(attribute='name')|map('regex_search', r'(\d{4})')|select|list|length }}</h2>
+                        <p>Years Covered</p>
+                    </div>
+                </div>
+                <a href="/stats" class="btn btn-light mt-3">
+                    <i class="fas fa-chart-bar"></i> View Detailed Statistics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-warning text-center">
+            <h4><i class="fas fa-exclamation-triangle"></i> No Conference Data Found</h4>
+            <p>No conference JSON files found in the output directory.</p>
+            <p>Please run the scraper first:</p>
+            <code>python main.py --scrape CONFERENCE --year YEAR</code>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> How to Use</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-download text-primary"></i> 1. Scrape Papers</h6>
+                        <p class="small">Use the command line tools to scrape papers from conferences.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-search text-success"></i> 2. Browse & Search</h6>
+                        <p class="small">Use this web interface to browse, search, and filter papers.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-external-link-alt text-info"></i> 3. Find Citations</h6>
+                        <p class="small">Click on papers to get direct links to major academic databases.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

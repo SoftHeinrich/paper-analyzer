@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}{{ conference_name }} - PaperHelper{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>
+            <i class="fas fa-university text-primary"></i>
+            {{ conference_name }}
+        </h1>
+        <p class="text-muted">
+            <i class="fas fa-file-alt"></i> {{ total_papers }} papers
+            {% if search_query or year_filter or track_filter %}
+            (filtered)
+            {% endif %}
+        </p>
+    </div>
+    <div>
+        <a href="/" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Conferences
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="filter-section">
+    <form method="GET" class="row g-3">
+        <div class="col-md-6">
+            <label for="search" class="form-label">Search Papers</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Search titles, authors, abstracts...">
+            </div>
+        </div>
+        
+        {% if years %}
+        <div class="col-md-3">
+            <label for="year" class="form-label">Year</label>
+            <select class="form-select" id="year" name="year">
+                <option value="">All Years</option>
+                {% for year in years %}
+                <option value="{{ year }}" {% if year_filter == year|string %}selected{% endif %}>
+                    {{ year }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        
+        {% if track_types %}
+        <div class="col-md-3">
+            <label for="track_type" class="form-label">Track Type</label>
+            <select class="form-select" id="track_type" name="track_type">
+                <option value="">All Tracks</option>
+                {% for track in track_types %}
+                <option value="{{ track }}" {% if track_filter == track %}selected{% endif %}>
+                    {{ track|title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <a href="/conference/{{ filename }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Papers List -->
+{% if papers %}
+<div class="row">
+    {% for paper in papers %}
+    <div class="col-12 mb-3">
+        <div class="card paper-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title">
+                            <a href="/paper/{{ filename }}/{{ loop.index0 + (current_page - 1) * 20 }}" 
+                               class="paper-title">
+                                {{ paper.title }}
+                            </a>
+                        </h5>
+                        
+                        {% if paper.authors %}
+                        <p class="author-list mb-1">
+                            <i class="fas fa-users"></i>
+                            {% for author in paper.authors[:5] %}
+                                {{ author.name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            {% if paper.authors|length > 5 %}
+                                <span class="text-muted">... and {{ paper.authors|length - 5 }} more</span>
+                            {% endif %}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                            {% if paper.year %}
+                            <span class="badge bg-info">
+                                <i class="fas fa-calendar"></i> {{ paper.year }}
+                            </span>
+                            {% endif %}
+                            
+                            {% if paper.track_type %}
+                            <span class="badge bg-warning track-badge">
+                                <i class="fas fa-tag"></i> {{ paper.track_type|title }}
+                            </span>
+                            {% endif %}
+                            
+                            {% if paper.doi %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-link"></i> DOI
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if paper.abstract %}
+                        <p class="card-text mt-2">
+                            <small class="text-muted">
+                                {{ paper.abstract[:200] }}{% if paper.abstract|length > 200 %}...{% endif %}
+                            </small>
+                        </p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="ms-3">
+                        <a href="/paper/{{ filename }}/{{ loop.index0 + (current_page - 1) * 20 }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if current_page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ current_page - 1 }}&search={{ search_query }}&year={{ year_filter }}&track_type={{ track_filter }}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in range(1, total_pages + 1) %}
+        {% if page_num == current_page %}
+        <li class="page-item active">
+            <span class="page-link">{{ page_num }}</span>
+        </li>
+        {% elif page_num <= 3 or page_num > total_pages - 3 or (page_num >= current_page - 2 and page_num <= current_page + 2) %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_num }}&search={{ search_query }}&year={{ year_filter }}&track_type={{ track_filter }}">
+                {{ page_num }}
+            </a>
+        </li>
+        {% elif page_num == 4 or page_num == total_pages - 3 %}
+        <li class="page-item disabled">
+            <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        {% endfor %}
+        
+        {% if current_page < total_pages %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ current_page + 1 }}&search={{ search_query }}&year={{ year_filter }}&track_type={{ track_filter }}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<div class="text-center text-muted">
+    Showing {{ (current_page - 1) * 20 + 1 }} - {{ current_page * 20 if current_page * 20 < total_papers else total_papers }} 
+    of {{ total_papers }} papers
+</div>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info text-center">
+    <h4><i class="fas fa-search"></i> No Papers Found</h4>
+    {% if search_query or year_filter or track_filter %}
+    <p>No papers match your current filters. Try adjusting your search criteria.</p>
+    {% else %}
+    <p>This conference file appears to be empty.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
